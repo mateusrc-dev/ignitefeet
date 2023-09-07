@@ -15,7 +15,7 @@ import { StatusBar } from "react-native";
 import { theme } from "./src/theme";
 
 import { ANDROID_CLIENT_ID } from "@env";
-import { Home } from "./src/screens/Home";
+import { Routes } from "./src/routes";
 
 console.log(ANDROID_CLIENT_ID);
 
@@ -35,7 +35,7 @@ export default function App() {
           translucent
         />
         <UserProvider fallback={SignIn}>
-          <Home />
+          <Routes />
         </UserProvider>
       </ThemeProvider>
     </AppProvider>
