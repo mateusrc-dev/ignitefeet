@@ -1,4 +1,9 @@
 import { ThemeProvider } from "styled-components/native";
+
+import { AppProvider, UserProvider } from "@realm/react";
+
+import { REALM_APP_ID } from "@env";
+
 import { SignIn } from "./src/screens/SignIn";
 import {
   useFonts,
@@ -10,6 +15,7 @@ import { StatusBar } from "react-native";
 import { theme } from "./src/theme";
 
 import { ANDROID_CLIENT_ID } from "@env";
+import { Home } from "./src/screens/Home";
 
 console.log(ANDROID_CLIENT_ID);
 
@@ -21,13 +27,17 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      <SignIn />
-    </ThemeProvider>
+    <AppProvider id={REALM_APP_ID}>
+      <ThemeProvider theme={theme}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <UserProvider fallback={SignIn}>
+          <Home />
+        </UserProvider>
+      </ThemeProvider>
+    </AppProvider>
   );
 }
