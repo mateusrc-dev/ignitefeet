@@ -64,6 +64,10 @@ export function Home() {
     }
   }
 
+  function handleHistoricDetails(id: string) {
+    navigate("arrival", { id });
+  }
+
   useEffect(() => {
     fetchVehicleInUse();
   }, []);
@@ -95,6 +99,7 @@ export function Home() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <HistoricCard
+              onPress={() => handleHistoricDetails(item.id)}
               data={{
                 created: item.created,
                 licensePlate: item.licensePlate,
