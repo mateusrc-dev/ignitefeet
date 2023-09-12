@@ -13,6 +13,7 @@ import {
   getLastAsyncTimestamp,
   saveLastSyncTimestamp,
 } from "../../libs/asyncStorage/syncStorage";
+import Toast from "react-native-toast-message";
 
 export function Home() {
   const [vehicleInUse, setVehicleInUse] = useState<Historic | null>(null);
@@ -86,6 +87,11 @@ export function Home() {
     if (percentage === 100) {
       await saveLastSyncTimestamp();
       fetchHistoric();
+
+      Toast.show({
+        type: "info",
+        text1: "Todos os dados estão sincronizados.",
+      });
     }
   }
 
