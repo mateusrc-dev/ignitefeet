@@ -9,6 +9,10 @@ import { Alert, FlatList } from "react-native";
 import { HistoricCard, HistoricCardProps } from "../../components/HistoricCard";
 import dayjs from "dayjs";
 import { useUser } from "@realm/react";
+import {
+  getLastAsyncTimestamp,
+  saveLastSyncTimestamp,
+} from "../../libs/asyncStorage/syncStorage";
 
 export function Home() {
   const [vehicleInUse, setVehicleInUse] = useState<Historic | null>(null);
@@ -43,17 +47,19 @@ export function Home() {
     }
   }
 
-  function fetchHistoric() {
+  async function fetchHistoric() {
     try {
       const response = historic.filtered(
         "status = 'arrival' SORT(created_at DESC)"
       );
 
+      const lasSync = await getLastAsyncTimestamp();
+
       const formattedHistoric = response.map((item) => {
         return {
           id: item._id!.toString(),
           licensePlate: item.license_plate,
-          isSync: false,
+          isSync: lasSync > item.updated_at!.getTime(),
           created: dayjs(item.updated_at).format(
             "[Saída em] DD/MM/YYYY [às] HH:mm"
           ),
@@ -69,6 +75,18 @@ export function Home() {
 
   function handleHistoricDetails(id: string) {
     navigate("arrival", { id });
+  }
+
+  async function ProgressNotification(
+    transferred: number,
+    transferable: number
+  ) {
+    const percentage = (transferred / transferable) * 100;
+
+    if (percentage === 100) {
+      await saveLastSyncTimestamp();
+      fetchHistoric();
+    }
   }
 
   useEffect(() => {
@@ -98,6 +116,22 @@ export function Home() {
       mutableSubs.add(historicByUserQuery, { name: "historic_by_user" });
     });
   }, [realm]);
+
+  useEffect(() => {
+    const syncSession = realm.syncSession;
+
+    if (!syncSession) {
+      return;
+    }
+
+    syncSession.addProgressNotification(
+      Realm.ProgressDirection.Upload,
+      Realm.ProgressMode.ReportIndefinitely,
+      ProgressNotification
+    );
+
+    return () => syncSession.removeProgressNotification(ProgressNotification);
+  }, []);
 
   return (
     <Container>
