@@ -11,12 +11,20 @@ import { useRealm } from "../../libs/realm";
 import { Historic } from "../../libs/realm/schemas/Historic";
 import { useNavigation } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useForegroundPermissions } from "expo-location";
+import {
+  LocationAccuracy,
+  useForegroundPermissions,
+  watchPositionAsync,
+  LocationSubscription,
+} from "expo-location";
+import { getAddressLocation } from "../../utils/getAddressLocation";
+import { Loading } from "../../components/Loading";
 
 export function Departure() {
   const [description, setDescription] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
   const [locationForegroundPermission, requestForegroundPermission] =
     useForegroundPermissions();
@@ -71,6 +79,37 @@ export function Departure() {
   useEffect(() => {
     requestForegroundPermission();
   }, []);
+
+  useEffect(() => {
+    if (!locationForegroundPermission?.granted) {
+      return;
+    }
+
+    let subscription: LocationSubscription;
+    watchPositionAsync(
+      {
+        accuracy: LocationAccuracy.High,
+        timeInterval: 1000,
+      },
+      (location) => {
+        getAddressLocation(location.coords).then((address) =>
+          console.log(address)
+        );
+      }
+    )
+      .then((response) => (subscription = response))
+      .finally(() => setIsLoadingLocation(false));
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, [locationForegroundPermission]);
+
+  if (isLoadingLocation) {
+    return <Loading />;
+  }
 
   if (!locationForegroundPermission?.granted) {
     return (
