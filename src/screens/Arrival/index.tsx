@@ -20,6 +20,8 @@ import { useEffect, useState } from "react";
 import { getLastAsyncTimestamp } from "../../libs/asyncStorage/syncStorage";
 import { stopLocationTask } from "../../tasks/backgroundLocationTask";
 import { getStorageLocation } from "../../libs/asyncStorage/locationStorage";
+import { LatLng } from "react-native-maps";
+import { Map } from "../../components/Map";
 
 type RouteParamsProps = {
   id: string;
@@ -27,6 +29,7 @@ type RouteParamsProps = {
 
 export function Arrival() {
   const [dataNotSynced, setDataNotSynced] = useState(false);
+  const [coordinates, setCoordinates] = useState<LatLng[]>([]);
 
   const route = useRoute();
   const { id } = route.params as RouteParamsProps;
@@ -42,10 +45,12 @@ export function Arrival() {
     ]);
   }
 
-  function removeVehicleUsage() {
+  async function removeVehicleUsage() {
     realm.write(() => {
       realm.delete(historic);
     });
+
+    await stopLocationTask();
 
     goBack();
   }
@@ -59,12 +64,12 @@ export function Arrival() {
         );
       }
 
-      await stopLocationTask();
-
       realm.write(() => {
         historic.status = "arrival";
         historic.updated_at = new Date();
       });
+
+      await stopLocationTask();
 
       Alert.alert("Chegada", "Chegada registrada com sucesso!");
       goBack();
@@ -81,7 +86,7 @@ export function Arrival() {
     setDataNotSynced(updatedAt > lastSync);
 
     const locationsStorage = await getStorageLocation();
-    console.log("STORAGE =>", locationsStorage);
+    setCoordinates(locationsStorage);
   }
 
   useEffect(() => {
@@ -95,6 +100,8 @@ export function Arrival() {
       ) : (
         <Header title="Detalhes" />
       )}
+
+      {coordinates.length > 0 && <Map coordinates={coordinates} />}
       <Content>
         <Label>Placa do veículo</Label>
         <LicensePlate>{historic?.license_plate}</LicensePlate>
