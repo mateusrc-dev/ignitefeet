@@ -92,6 +92,13 @@ export function Departure() {
             description,
             license_plate: licensePlate.toUpperCase(),
             user_id: user!.id,
+            coords: [
+              {
+                latitude: currentCoords.latitude,
+                longitude: currentCoords.longitude,
+                timestamp: new Date().getTime(),
+              },
+            ],
           })
         );
       });
