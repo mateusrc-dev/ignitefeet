@@ -4,7 +4,7 @@ import { Button } from "../../components/Button";
 import { Header } from "../../components/Header";
 import { LicensePlateInput } from "../../components/LicensePlaceInput";
 import { TextAreaInput } from "../../components/TextAreaInput";
-import { Container, Content, Message } from "./styles";
+import { Container, Content, Message, MessageContent } from "./styles";
 import { useEffect, useRef, useState } from "react";
 import { licensePlateValidate } from "../../utils/licensePlateValidate";
 import { useRealm } from "../../libs/realm";
@@ -25,6 +25,7 @@ import { LocationInfo } from "../../components/LocationInfo";
 import { Car } from "phosphor-react-native";
 import { Map } from "../../components/Map";
 import { startLocationTask } from "../../tasks/backgroundLocationTask";
+import { openSettings } from "../../utils/openSettings";
 
 export function Departure() {
   const [description, setDescription] = useState("");
@@ -79,7 +80,8 @@ export function Departure() {
 
         return Alert.alert(
           "Localização",
-          'É necessário permitir que o App tenha acesso a localização em segundo plano. Acesse as configurações e habilite "Permitir o tempo todo".'
+          'É necessário permitir que o App tenha acesso a localização em segundo plano. Acesse as configurações e habilite "Permitir o tempo todo".',
+          [{ text: "Abrir Configurações", onPress: openSettings }]
         );
       }
 
@@ -146,21 +148,26 @@ export function Departure() {
     };
   }, [locationForegroundPermission]);
 
-  if (isLoadingLocation) {
-    return <Loading />;
-  }
-
   if (!locationForegroundPermission?.granted) {
     return (
       <Container>
         <Header title="Saída" />
-        <Message>
-          Você precisa permitir que o aplicativo tenha acesso a localização para
-          utilizar essa funcionalidade, por favor, acesse as configurações do
-          seu dispositivo para conceder essa permissão ao aplicativo.
-        </Message>
+        <MessageContent>
+          <Message>
+            Você precisa permitir que o aplicativo tenha acesso a localização
+            para utilizar essa funcionalidade, por favor, acesse as
+            configurações do seu dispositivo para conceder essa permissão ao
+            aplicativo.
+          </Message>
+
+          <Button title="Abrir Configurações" onPress={openSettings} />
+        </MessageContent>
       </Container>
     );
+  }
+
+  if (isLoadingLocation) {
+    return <Loading />;
   }
 
   return (
