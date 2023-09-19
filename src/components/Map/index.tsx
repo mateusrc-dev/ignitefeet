@@ -41,18 +41,35 @@ export function Map({ coordinates, ...rest }: Props) {
       onMapLoaded={onMapLoaded}
       {...rest}
     >
-      <Marker identifier="departure" coordinate={coordinates[0]}>
+      <Marker
+        identifier="departure"
+        coordinate={{
+          latitude: coordinates[0].latitude,
+          longitude: coordinates[0].longitude,
+        }}
+      >
         <IconBox size="SMALL" icon={Car} />
       </Marker>
 
       {coordinates.length > 1 && (
         <>
-          <Marker identifier="arrival" coordinate={lastCoordinate}>
+          <Marker
+            identifier="arrival"
+            coordinate={{
+              latitude: lastCoordinate.latitude,
+              longitude: lastCoordinate.longitude,
+            }}
+          >
             <IconBox size="SMALL" icon={FlagCheckered} />
           </Marker>
 
           <Polyline
-            coordinates={[...coordinates]}
+            coordinates={[
+              ...coordinates.map((coordinate) => ({
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+              })),
+            ]}
             strokeColor={COLORS.GRAY_700}
             strokeWidth={7}
           />
