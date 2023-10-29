@@ -41,8 +41,6 @@ export function Arrival() {
   const [arrival, setArrival] = useState<LocationInfoProps | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(coordinates);
-
   const route = useRoute();
   const { id } = route.params as RouteParamsProps;
 
